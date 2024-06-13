@@ -2,41 +2,44 @@ import requests
 from bs4 import BeautifulSoup
 
 class Spotahome:
-    def __init__(self, city, availability=None, budget=None, property_type=None):
+    def __init__(self, city, availability, budget, property_type):
         self.city = city
         self.availability = availability
         self.budget = budget
         self.property_type = property_type
         self.base_url = self.build_url()
     
+    # function to build the url, arguments given in the init function (by the customer). In other words, what houses do you want to scrape?
     def build_url(self):
         base_url = f'https://www.spotahome.com/s/{self.city}'
         
-        # Add property type to URL if specified
+        # Add property type to URL if that argument is given
         if self.property_type:
             base_url += f'/for-rent:{self.property_type}'
         
         # Initialize query parameters
         params = {}
         
-        # Add availability dates to query parameters if specified
+        # Add availability dates to query parameters if those arguments are given
         if self.availability:
             params['move-in'] = self.availability
             params['moveInFrom'] = self.availability
-            params['moveInTo'] = self.availability  # Assuming a fixed range for simplicity
+            params['moveInTo'] = self.availability
         
-        # Add budget range to query parameters if specified
+        # Add budget range to query parameters if that argument is given
         if self.budget:
             params['budget'] = self.budget
         
-        # Construct query string
+        # query string build up
         query_string = '&'.join([f'{key}={value}' for key, value in params.items()])
         
-        # Combine base URL with query string
+        # Combine base URL with query string 
+        # return the 
         full_url = f'{base_url}?{query_string}' if query_string else base_url
         
         return full_url
     
+    # function to get all the url's of the listings of the page, based on the build_url function above
     def scrape_listing_urls(self):
         response = requests.get(self.base_url)
         if response.status_code == 200:
@@ -65,6 +68,7 @@ class Spotahome:
             print(f"Failed to retrieve content: {response.status_code}")
             return [], 'N/A'
     
+    # function to get all the details per listing
     def scrape_listing_details(self, url):
         response = requests.get(url)
         if response.status_code == 200:
@@ -91,6 +95,7 @@ class Spotahome:
             print(f"Failed to retrieve content from {url}: {response.status_code}")
             return ('N/A', 'N/A', 'N/A', 'N/A', url)
     
+    # function to call the scraper and put it in a list
     def scrape(self):
         urls, total_listings = self.scrape_listing_urls()
         
@@ -101,37 +106,13 @@ class Spotahome:
         
         return data
 
-# Example usage
+# call the class
 spotahome = Spotahome(
     city='barcelona--spain',
-    availability='2024-06-12',
+    availability='2024-06-14',
     budget='1500-1750',
     property_type='apartments'
 )
 data = spotahome.scrape()
 for each in data:
     print(each)
-
-'''
-    @staticmethod
-    def save_to_database(data, db_name='rentals.db'):
-        conn = sqlite3.connect(db_name)
-        c = conn.cursor()
-        c.execute(
-            CREATE TABLE IF NOT EXISTS rentals (
-                id INTEGER PRIMARY KEY,
-                title TEXT,
-                price TEXT,
-                size TEXT,
-                location TEXT
-            )
-        )
-        c.executemany('INSERT INTO rentals (title, price, size, location) VALUES (?, ?, ?, ?)', data)
-        conn.commit()
-        conn.close()
-
-# Example usage:
-spotahome = Spotahome('barcelona--spain')
-data = spotahome.scrape('available', 'apartment', 1500)
-Spotahome.save_to_database(data)
-'''
