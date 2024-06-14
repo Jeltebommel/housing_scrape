@@ -105,14 +105,3 @@ class Spotahome:
             data.append(listing_details + (total_listings,))
         
         return data
-
-# call the class
-spotahome = Spotahome(
-    city='barcelona--spain',
-    availability='2024-06-14',
-    budget='1500-1750',
-    property_type='apartments'
-)
-data = spotahome.scrape()
-for each in data:
-    print(each)
