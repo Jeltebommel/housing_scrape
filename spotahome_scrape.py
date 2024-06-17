@@ -1,74 +1,35 @@
+from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
 class Spotahome:
-    def __init__(self, city, availability, budget, property_type):
+    def __init__(self, city, move_in_from=None, move_in_to=None, budget=None, property_type=None):
         self.city = city
-        self.availability = availability
+        self.move_in_from = move_in_from
+        self.move_in_to = move_in_to
         self.budget = budget
         self.property_type = property_type
-        self.base_url = self.build_url()
-    
-    # function to build the url, arguments given in the init function (by the customer). In other words, what houses do you want to scrape?
+
     def build_url(self):
         base_url = f'https://www.spotahome.com/s/{self.city}'
-        
-        # Add property type to URL if that argument is given
-        if self.property_type:
-            base_url += f'/for-rent:{self.property_type}'
-        
-        # Initialize query parameters
         params = {}
-        
-        # Add availability dates to query parameters if those arguments are given
-        if self.availability:
-            params['move-in'] = self.availability
-            params['moveInFrom'] = self.availability
-            params['moveInTo'] = self.availability
-        
-        # Add budget range to query parameters if that argument is given
+
+        if self.move_in_from and self.move_in_to:
+            params['moveInFrom'] = self.move_in_from
+            params['moveInTo'] = self.move_in_to
+            params['move-in'] = self.move_in_from
+
         if self.budget:
             params['budget'] = self.budget
-        
-        # query string build up
+
+        if self.property_type:
+            base_url += f'/for-rent:{self.property_type}'
+
         query_string = '&'.join([f'{key}={value}' for key, value in params.items()])
-        
-        # Combine base URL with query string 
-        # return the 
-        full_url = f'{base_url}?{query_string}' if query_string else base_url
-        
+        full_url = f'{base_url}?{query_string}'
+
         return full_url
-    
-    # function to get all the url's of the listings of the page, based on the build_url function above
-    def scrape_listing_urls(self):
-        response = requests.get(self.base_url)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            
-            # Get the total number of listings
-            total_listings_div = soup.find('div', class_='search-listing__total-results')
-            if total_listings_div:
-                strong_tag = total_listings_div.find('strong')
-                total_listings = strong_tag.get_text(strip=True) if strong_tag else 'N/A'
-                print("Total Listings:", total_listings)
-            else:
-                total_listings = 'N/A'
-            
-            # Get the URLs of the first 30 listings
-            listings = soup.find_all('div', class_='HomecardContent_homecard-content__w-eHe', limit=30)
-            urls = []
-            for listing in listings:
-                link_tag = listing.find('a', class_='HomecardContent_homecard-content__header__4FMs+')
-                link_url = f"https://www.spotahome.com{link_tag['href']}" if link_tag else None
-                if link_url:
-                    urls.append(link_url)
-            
-            return urls, total_listings
-        else:
-            print(f"Failed to retrieve content: {response.status_code}")
-            return [], 'N/A'
-    
-    # function to get all the details per listing
+
     def scrape_listing_details(self, url):
         response = requests.get(url)
         if response.status_code == 200:
@@ -93,26 +54,53 @@ class Spotahome:
             return (title_text, prop_type_text, available_date_text, price_text, url)
         else:
             print(f"Failed to retrieve content from {url}: {response.status_code}")
-            return ('N/A', 'N/A', 'N/A', 'N/A', url)
-    
-    # function to call the scraper and put it in a list
-    def scrape(self):
-        urls, total_listings = self.scrape_listing_urls()
-        
-        data = []
-        for url in urls:
-            listing_details = self.scrape_listing_details(url)
-            data.append(listing_details + (total_listings,))
-        
-        return data
 
-# call the class
+    def scrape(self):
+        url = self.build_url()
+        print("Scraping URL:", url)
+        response = requests.get(url)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Get the total number of listings
+            total_listings_div = soup.find('div', class_='search-listing__total-results')
+            if total_listings_div:
+                strong_tag = total_listings_div.find('strong')
+                total_listings = strong_tag.get_text(strip=True) if strong_tag else 'N/A'
+                print("Total Listings:", total_listings)
+            else:
+                total_listings = 'N/A'
+            
+            # Get the URLs of the first 10 listings
+            listings = soup.find_all('div', class_='HomecardContent_homecard-content__w-eHe', limit=10)
+            urls = []
+            for listing in listings:
+                link_tag = listing.find('a', class_='HomecardContent_homecard-content__header__4FMs+')
+                link_url = f"https://www.spotahome.com{link_tag['href']}" if link_tag else None
+                if link_url:
+                    urls.append(link_url)
+            
+            # Scrape details for each listing
+            data = []
+            for url in urls:
+                listing_details = self.scrape_listing_details(url)
+                data.append(listing_details + (total_listings,))
+            
+            return data
+        else:
+            print(f"Failed to retrieve content: {response.status_code}")
+            return []
+
+# Example usage
 spotahome = Spotahome(
     city='barcelona--spain',
-    availability='2024-06-14',
+    move_in_from='2024-06-14',
+    move_in_to='2024-07-14',
     budget='1500-1750',
     property_type='apartments'
 )
 data = spotahome.scrape()
-for each in data:
-    print(each)
+
+# Print the extracted data
+for entry in data:
+    print(entry)
