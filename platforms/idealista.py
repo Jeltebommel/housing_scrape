@@ -122,3 +122,4 @@ class Spotahome:
             return []
         finally:
             driver.quit()
+
