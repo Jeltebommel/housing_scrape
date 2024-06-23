@@ -73,18 +73,21 @@ class Ukio:
         
         try:
             for url in urls:
-
                 driver.get(url)
                 
-                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'h1')))
+                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'main')))
 
                 title = driver.find_element(By.CSS_SELECTOR, 'section.space-y-2.bg-white h1').text
 
-                
-                #price_container = driver.find_element(By.CSS_SELECTOR, 'div.font-poppins.mb-6.flex.justify-between.tracking-[0.8px]').text
-                #price = price_container.find_element(By.CSS_SELECTOR, 'span.text-2xl').text
+                #price = driver.find_element(By.CSS_SELECTOR, 'span.whitespace-nowrap').text
 
-                data.append((title ,url))
+                # Locate the element for size
+                size_element = driver.find_element(By.CSS_SELECTOR, 'div.font-form.grid.grid-flow-row.auto-rows-max.grid-cols-2.gap-x-6.pt-2.text-xs.md\\:auto-cols-max.md\\:grid-flow-col.md\\:grid-cols-none.md\\:pt-4.md\\:text-sm')
+                size = size_element.find_element(By.XPATH, './/p[contains(text(), "m²")]').text
+
+                
+                
+                data.append((title, size, url))
                 
         except (TimeoutException, NoSuchElementException) as e:
             print(f"Error while scraping {url}: {e}")
