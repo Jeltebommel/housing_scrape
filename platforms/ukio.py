@@ -82,12 +82,10 @@ class Ukio:
                 #price = driver.find_element(By.CSS_SELECTOR, 'span.whitespace-nowrap').text
 
                 # Locate the element for size
-                size_element = driver.find_element(By.CSS_SELECTOR, 'div.font-form.grid.grid-flow-row.auto-rows-max.grid-cols-2.gap-x-6.pt-2.text-xs.md\\:auto-cols-max.md\\:grid-flow-col.md\\:grid-cols-none.md\\:pt-4.md\\:text-sm')
-                size = size_element.find_element(By.XPATH, './/p[contains(text(), "m²")]').text
-
+                parent_container = driver.find_element(By.CSS_SELECTOR, 'div.font-form.grid.grid-flow-row.auto-rows-max.grid-cols-2.gap-x-6.pt-2.text-xs.md\\:auto-cols-max.md\\:grid-flow-col.md\\:grid-cols-none.md\\:pt-4.md\\:text-sm').text
                 
                 
-                data.append((title, size, url))
+                data.append((title, parent_container, url))
                 
         except (TimeoutException, NoSuchElementException) as e:
             print(f"Error while scraping {url}: {e}")
