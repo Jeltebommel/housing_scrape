@@ -58,6 +58,9 @@ class ProperstarScraper:
         finally:
             driver.quit()
 
-# Example usage:
+    ### Hier nu mee bezig ###
+
+
+
 properstar_scraper = ProperstarScraper(city="barcelona", min_price=500, max_price=2000, bedrooms=2)
 print(properstar_scraper.get_listing_urls())

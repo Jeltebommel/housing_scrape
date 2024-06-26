@@ -54,22 +54,22 @@ class HousingAnywhere:
 
             # Extract monthly price
             # Extract price
-            outer_container = driver.find_element(By.CSS_SELECTOR, 'div.css-2iqnx5-listingInfo')
+            #outer_container = driver.find_element(By.CSS_SELECTOR, 'div.css-2iqnx5-listingInfo')
             
-            second_div = outer_container.find_elements(By.TAG_NAME, 'div')
-            for each in second_div:
-                try:
-                    price_text = each.find_element(By.CSS_SELECTOR, 'span[data-test-locator="Listing/ListingInfo/Price"]').text
-                    break 
-                except NoSuchElementException:
-                    continue 
+            #second_div = outer_container.find_elements(By.TAG_NAME, 'div')
+            #for each in second_div:
+                #try:
+                    #price_text = each.find_element(By.CSS_SELECTOR, 'span[data-test-locator="Listing/ListingInfo/Price"]').text
+                    #break 
+                #except NoSuchElementException:
+                    #continue 
             
 
             # Extract property size
             size_text = driver.find_element(By.CSS_SELECTOR, 'div.MuiChip-root[data-test-locator="HighlightsTags/Property"]').text
             size = size_text.split(': ')[1]  # Get the size part
 
-            return (title, price_text, size, url)
+            return (title, size, url)
         
         except (TimeoutException, NoSuchElementException) as e:
             print(f"Error while scraping {url}: {e}")

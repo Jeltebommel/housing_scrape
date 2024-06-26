@@ -79,6 +79,8 @@ class Ukio:
 
                 title = driver.find_element(By.CSS_SELECTOR, 'section.space-y-2.bg-white h1').text
 
+                ### Title lukt wel, price en size kan ik niet vinden ###
+
                 #price = driver.find_element(By.CSS_SELECTOR, 'span.whitespace-nowrap').text
 
                 # Locate the element for size
