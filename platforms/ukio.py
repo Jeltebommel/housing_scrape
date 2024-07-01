@@ -14,9 +14,13 @@ class Ukio:
         self.exact_bedrooms = exact_bedrooms
         self.rent_from = rent_from
         self.rent_to = rent_to
+    
+    def build_city(self):
+        city = self.city
+        return city
 
     def build_url(self):
-        base_url = f'https://ukio.com/apartments/{self.city}'
+        base_url = f'https://ukio.com/apartments/{self.build_city()}'
         params = {}
 
         if self.check_in:
@@ -49,7 +53,7 @@ class Ukio:
             listings = driver.find_elements(By.CSS_SELECTOR, 'li.flex.flex-col.gap-x-6.bg-white')
 
             urls = []
-            for listing in listings:
+            for listing in listings[:5]:
                 link_tag = listing.find_element(By.TAG_NAME, 'a')
                 link_url = f"{link_tag.get_attribute('href')}"
                 urls.append(link_url)
@@ -64,7 +68,7 @@ class Ukio:
         finally:
             driver.quit()
 
-    def get_listing_details(self):
+    def scrape(self):
         urls = self.get_listing_urls()
 
         data = []
@@ -79,15 +83,23 @@ class Ukio:
 
                 title = driver.find_element(By.CSS_SELECTOR, 'section.space-y-2.bg-white h1').text
 
+                size_elements = driver.find_element(By.CSS_SELECTOR, 'div.font-form.grid.grid-flow-row').text.split('\n')
+                size = ' '.join(size_elements) if isinstance(size_elements, list) else size_elements
+
+                price = driver.find_element(By.CSS_SELECTOR, 'div.mt-8.mb-8.flex.w-full.flex-col').text
+
+
+
+
                 ### Title lukt wel, price en size kan ik niet vinden ###
 
                 #price = driver.find_element(By.CSS_SELECTOR, 'span.whitespace-nowrap').text
 
                 # Locate the element for size
-                parent_container = driver.find_element(By.CSS_SELECTOR, 'div.font-form.grid.grid-flow-row.auto-rows-max.grid-cols-2.gap-x-6.pt-2.text-xs.md\\:auto-cols-max.md\\:grid-flow-col.md\\:grid-cols-none.md\\:pt-4.md\\:text-sm').text
+                #size = driver.find_elements(By.CSS_SELECTOR, 'div.font-form.grid.grid-flow-row.auto-rows-max.grid-cols-2.gap-x-6.pt-2.text-xs.md:auto-cols-max.md:grid-flow-col.md:grid-cols-none.md:pt-4.md:text-sm').text
                 
                 
-                data.append((title, parent_container, url))
+                data.append((title, price, size, url))
                 
         except (TimeoutException, NoSuchElementException) as e:
             print(f"Error while scraping {url}: {e}")
@@ -96,8 +108,3 @@ class Ukio:
             driver.quit()
 
         return data
-
-# Usage example
-ukio = Ukio(city='barcelona', check_in='2024-11-01', check_out='2025-09-30', bedrooms=2, exact_bedrooms=True, rent_from=2000, rent_to=3500)
-print(ukio.build_url())
-print(ukio.get_listing_details())

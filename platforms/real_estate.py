@@ -5,33 +5,35 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
-class Properstar:
+
+class RealEstate:
     def __init__(self, city, min_price=None, max_price=None, bedrooms=None):
         self.city = city
         self.min_price = min_price
         self.max_price = max_price
         self.bedrooms = bedrooms
-    
+        
     def build_city(self):
-        city = f"spanje/{self.city}"
+        city = f"{self.city.capitalize()}--spain"
         return city
 
     def build_url(self):
-        base_url = f"https://www.properstar.nl/{self.build_city()}/huur/appartement-huis"
+        base_url = f"https://www.realestate.com.au/international/es/{self.build_city()}/rent"
         params = {}
 
         if self.min_price:
-            params['price.min'] = self.min_price
+            params['minprice'] = self.min_price
         if self.max_price:
-            params['price.max'] = self.max_price
+            params['maxprice'] = self.max_price
         if self.bedrooms:
-            base_url += f"/{self.bedrooms}p-slaapkamers"
+            params['minbed'] = self.bedrooms
 
         query_string = urlencode(params)
         full_url = base_url if not query_string else f"{base_url}?{query_string}"
         
         return full_url
-    
+
+
     def get_listing_urls(self):
         url = self.build_url()
         print(f"Scraping from: {url}")
@@ -40,9 +42,9 @@ class Properstar:
         driver.get(url)
 
         try:
-            WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'container')))
+            WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.o8y0h-0.hxCDMi')))
 
-            listings = driver.find_elements(By.CSS_SELECTOR, 'article.item-adaptive.card-extended')
+            listings = driver.find_elements(By.CSS_SELECTOR, 'div.sc-1dun5hk-0.cOiOrj')
 
             urls = []
 
@@ -73,15 +75,14 @@ class Properstar:
             for url in urls:
                 driver.get(url)
                 
-                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.item-page.listing-page')))
+                WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, 'body')))
 
-                title = driver.find_element(By.CSS_SELECTOR, 'div.main-info').text
+                title = driver.find_element(By.CSS_SELECTOR, 'h1.display-address').text
+
+                price = driver.find_element(By.CSS_SELECTOR, 'div.sc-10v3xoh-0.kgiZMN.property-price').text.split(' ')[1]
+
+                size = driver.find_element(By.ID, 'listing-features').text
                 
-                 # Extracting and processing the price
-                price_elements = driver.find_element(By.CSS_SELECTOR, 'div.listing-info-price.h2').text.split('\n')
-                price = ' '.join(price_elements) if isinstance(price_elements, list) else price_elements
-                
-                size = driver.find_element(By.CSS_SELECTOR, 'div.highlights').text.split(' • ')[4]
                 
                 data.append((title, price, size, url))
                 
@@ -92,4 +93,3 @@ class Properstar:
             driver.quit()
 
         return data
-

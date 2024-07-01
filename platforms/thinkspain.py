@@ -6,25 +6,26 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 class ThinkSpain:
-    def __init__(self, city, bedrooms, min_price, max_price):
+    def __init__(self, city, min_price, max_price, bedrooms):
         self.city = city
-        self.bedrooms = bedrooms
         self.min_price = min_price
         self.max_price = max_price
+        self.bedrooms = bedrooms
+
+    def build_city(self):
+        city = f"{self.city}-city"
+        return city
 
     def build_url(self):
-        base_url = f"https://www.thinkspain.com/property-to-rent-long-term/{self.city}"
+        base_url = f"https://www.thinkspain.com/property-to-rent-long-term/{self.build_city()}"
         params = []
 
-        if self.min_price:
+        if self.min_price is not None:
             params.append(f"minprice={self.min_price}")
-        if self.max_price:
+        if self.max_price is not None:
             params.append(f"maxprice={self.max_price}")
-        if self.bedrooms:
-            if self.bedrooms == "exactly_2":
-                params.append("beds=e2")
-            else:
-                params.append(f"beds={self.bedrooms}")
+        if self.bedrooms is not None:
+            params.append(f"beds={self.bedrooms}")
 
         if params:
             return f"{base_url}?" + "&".join(params)
@@ -46,7 +47,7 @@ class ThinkSpain:
 
             urls = []
 
-            for listing in listings:
+            for listing in listings[:5]:
                 link_tag = listing.find_element(By.TAG_NAME, 'a')
                 link_url = f"{link_tag.get_attribute('href')}"
                 urls.append(link_url)
@@ -62,7 +63,7 @@ class ThinkSpain:
         finally:
             driver.quit()
 
-    def get_listing_details(self):
+    def scrape(self):
         urls = self.get_listing_urls()
 
         data = []
@@ -74,6 +75,8 @@ class ThinkSpain:
                 driver.get(url)
                 
                 WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.pagepopup__content')))
+
+                ### check even of jij de juiste css_selector kan vinden voor title size en price ###
 
                 loop = driver.find_elements(By.CSS_SELECTOR, 'div.pagepopup__content')
                 for each in loop:
@@ -91,8 +94,6 @@ class ThinkSpain:
 
         return data
 
-
-think_spain = ThinkSpain(city="barcelona-city", min_price=700, max_price=2000, bedrooms="2")
-
-output = think_spain.get_listing_details()
-print(output)
+think_spain = ThinkSpain("barcelona", min_price=500, max_price=3000, bedrooms=2)
+url = think_spain.build_url()
+print(url)

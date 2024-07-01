@@ -7,69 +7,70 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 import time
 
 class HousingAnywhere:
-    def __init__(self, city, min_price, max_price, property_type, bedrooms):
+    def __init__(self, city, min_price, max_price, bedrooms):
         self.city = city
         self.min_price = min_price
         self.max_price = max_price
-        self.property_type = property_type
         self.bedrooms = bedrooms
 
+    def build_city(self):
+        city = f"{self.city.capitalize()}--Spain"
+        return city
+    
     def build_url(self):
-        base_url = f'https://housinganywhere.com/s/{self.city}--Spain'
+        # Construct the base URL
+        base_url = f'https://housinganywhere.com/s/{self.build_city()}'
+        
+        # Add suffix for the type of apartments based on bedrooms
+        if self.bedrooms == '2':
+            base_url += '/two-bedroom-apartments'
+        elif self.bedrooms == '3':
+            base_url += '/three-bedroom-apartments'
+        elif self.bedrooms == '1':
+            base_url += '/one-bedroom-apartments'
+        else:
+            base_url += '/apartments'
+        
+        # Create the parameters list
         params = []
 
-        if self.min_price:
-            params.append(f'priceMin={self.min_price}')
+        if self.min_price is not None:
+            params.append(f'priceMin={self.min_price}00')
+        
+        if self.max_price is not None:
+            params.append(f'priceMax={self.max_price}00')
 
-        if self.max_price:
-            params.append(f'priceMax={self.max_price}')
-
-        if self.property_type:
-            property_type_mapping = {
-                'apartment': 'apartment-for-rent',
-                'studio': 'studio-for-rent',
-                'room': 'room-for-rent',
-                'student_residence': 'student-residence-for-rent'
-            }
-            params.append(f'categories={property_type_mapping.get(self.property_type, self.property_type)}')
-
+        # Append bedroom count as a parameter
         if self.bedrooms:
-            if self.bedrooms == '3+':
-                params.append('bedroomCount=1,2,3,4+')
-            else:
-                params.append(f'bedroomCount={self.bedrooms}')
+            params.append(f'bedroomCount={self.bedrooms}')
 
+        # Join the parameters with '&' and add to the URL
         query_string = '&'.join(params)
         full_url = f'{base_url}?{query_string}'
+        
         return full_url
 
     def scrape_listing_details(self, driver, url):
         driver.get(url)
         try:
-            # Wait until the page is fully loaded
             WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-md-8.css-1wlzjv3')))
 
-            # Extract data
+            ### deze functie lukt alleen om titel en size te krijgen ###
+
+
             title = driver.find_element(By.CSS_SELECTOR, 'span[data-test-locator="Listing/ListingInfo/street"]').text
 
-            # Extract monthly price
-            # Extract price
-            #outer_container = driver.find_element(By.CSS_SELECTOR, 'div.css-2iqnx5-listingInfo')
-            
-            #second_div = outer_container.find_elements(By.TAG_NAME, 'div')
-            #for each in second_div:
-                #try:
-                    #price_text = each.find_element(By.CSS_SELECTOR, 'span[data-test-locator="Listing/ListingInfo/Price"]').text
-                    #break 
-                #except NoSuchElementException:
-                    #continue 
-            
+            price = ' '
 
-            # Extract property size
+            #price_parent = driver.find_element(By.CSS_SELECTOR, 'div.css-cxuszf-container')
+            #price = price_parent.find_element(By.CSS_SELECTOR, 'div > div')
+            #for each in price:
+                #price = each.text
+
             size_text = driver.find_element(By.CSS_SELECTOR, 'div.MuiChip-root[data-test-locator="HighlightsTags/Property"]').text
             size = size_text.split(': ')[1]  # Get the size part
 
-            return (title, size, url)
+            return (title, price, size, url)
         
         except (TimeoutException, NoSuchElementException) as e:
             print(f"Error while scraping {url}: {e}")
@@ -117,8 +118,3 @@ class HousingAnywhere:
             return []
         finally:
             driver.quit()
-
-# Usage example
-housing_anywhere = HousingAnywhere(city='Barcelona', min_price=1000, max_price=None, property_type='apartment', bedrooms='2')
-data = housing_anywhere.scrape()
-print(data)
