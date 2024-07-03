@@ -45,7 +45,7 @@ class Spotahome:
             budget = f"{self.min_price}-{self.max_price}"
             params['budget'] = budget
 
-        if self.bedrooms:
+        if self.bedrooms and self.property_type == 'apartment':
             if self.bedrooms == '3+':
                 base_url += '/bedrooms:2/bedrooms:3more'
             else:

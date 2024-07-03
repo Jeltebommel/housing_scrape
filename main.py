@@ -3,6 +3,8 @@ from search import Search
 from save_data import DatabaseHandler
 
 def main():
+
+
     parser = argparse.ArgumentParser(description="Search for apartments and save results to a database.")
     
     parser.add_argument("--city", type=str, required=True, help="City to search in.")
@@ -24,13 +26,19 @@ def main():
         property_type=args.property_type,
         bedrooms=args.bedrooms
     )
-    search.execute()
+    if search.property_type == 'room':
+        search.execute_room()
+    elif search.property_type == 'studio':
+        search.execute_studio()
+    elif search.property_type == 'apartment':
+        search.execute_apartment()
     
-    db_handler = DatabaseHandler('listings_db')
+    db_handler = DatabaseHandler('listing_db')
     db_handler.create_table()
     
     for result in search.results:
-        platform, title, price, size, link = result
+        title, price, size, link = result
+        platform = "Spotahome" if "spotahome" in link else "ThinkSpain" if "thinkspain" in link else "Ukio" if "ukio" in link else "Properstar" if "properstar" in link else "RealEstate" if "realestate" in link else "Unknown"
         db_handler.insert_listing(platform, title, price, size, link)
         print(result)
     
@@ -38,3 +46,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

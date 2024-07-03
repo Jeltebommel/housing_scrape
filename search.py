@@ -14,8 +14,17 @@ class Search:
         self.max_price = max_price
         self.property_type = property_type
         self.bedrooms = bedrooms
-        self.platforms = [
-            HousingAnywhere(city, min_price, max_price, property_type, bedrooms),
+        self.platforms_room = [
+            #HousingAnywhere(city, min_price, max_price, property_type, bedrooms),
+            Spotahome(city, move_in, move_out, min_price, max_price, property_type, bedrooms),
+            Properstar(city, min_price, max_price, property_type, bedrooms),
+        ]
+        self.platforms_studio = [
+            #HousingAnywhere(city, min_price, max_price, property_type, bedrooms),
+            Spotahome(city, move_in, move_out, min_price, max_price, property_type, bedrooms),
+        ]
+        self.platforms_apartment = [
+            #HousingAnywhere(city, min_price, max_price, property_type, bedrooms),
             Spotahome(city, move_in, move_out, min_price, max_price, property_type, bedrooms),
             Properstar(city, min_price, max_price, property_type, bedrooms),
             ThinkSpain(city, min_price, max_price, bedrooms),
@@ -24,9 +33,23 @@ class Search:
         ]
         self.results = []
 
-    def execute(self):
-        for platform in self.platforms:
+    def execute_room(self):
+        for platform in self.platforms_room:
             listings = platform.scrape()
             for listing in listings:
                 self.results.append(listing)
+    
+    def execute_studio(self):
+        for platform in self.platforms_studio:
+            listings = platform.scrape()
+            for listing in listings:
+                self.results.append(listing)
+    
+    def execute_apartment(self):
+        for platform in self.platforms_apartment:
+            listings = platform.scrape()
+            for listing in listings:
+                self.results.append(listing)
+
+
 

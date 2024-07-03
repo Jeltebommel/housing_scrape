@@ -85,13 +85,15 @@ class HousingAnywhere:
         driver.get(url)
 
         try:
-            # Wait for the listings to load
-            WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div.item-page.listing-page')))
+            WebDriverWait(driver, 10).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, 'div.css-1sevf7j-listingsContainer')))
             time.sleep(5)  # Ensure all elements are loaded
 
-            # Extract listing URLs
-            listings = driver.find_elements(By.CSS_SELECTOR, 'div.item-page.listing-page')
-            urls = [listing.find_element(By.TAG_NAME, 'a').get_attribute('href') for listing in listings]
+            listings = driver.find_elements(By.CSS_SELECTOR, 'div.css-wp5dsn-container')
+            urls = []
+            for listing in listings:
+                link = listing.find_element(By.TAG_NAME, 'a')
+                href = link.get_attribute('href')
+                urls.append(href)
 
             # Scrape details for each listing
             data = []
