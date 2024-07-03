@@ -34,16 +34,27 @@ def main():
         search.execute_apartment()
     
     db_handler = DatabaseHandler('listing_db')
-    db_handler.create_table()
-    
+
+    # Fetch existing listings
+    existing_listings = db_handler.fetch_all_listings()
+    existing_links = []
+    [existing_links.append(listing[5]) for listing in existing_listings]
+
+    new_listings = []
+
     for result in search.results:
         title, price, size, link = result
         platform = "Spotahome" if "spotahome" in link else "ThinkSpain" if "thinkspain" in link else "Ukio" if "ukio" in link else "Properstar" if "properstar" in link else "RealEstate" if "realestate" in link else "Unknown"
-        db_handler.insert_listing(platform, title, price, size, link)
-        print(result)
+        
+        if link not in existing_links:
+            db_handler.insert_listing(platform, title, price, size, link)
+            new_listings.append(result)
+            print(f"New listing found: {result}")
+    
+    if not new_listings:
+        print("No new listings found.")
     
     db_handler.close()
 
 if __name__ == "__main__":
     main()
-

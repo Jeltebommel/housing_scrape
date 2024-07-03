@@ -6,26 +6,40 @@ class DatabaseHandler:
         self.create_table()
 
     def create_table(self):
-        query = """
-        CREATE TABLE IF NOT EXISTS listings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            platform TEXT,
-            title TEXT,
-            price TEXT,
-            size TEXT,
-            link TEXT
-        )
-        """
-        self.conn.execute(query)
-        self.conn.commit()
+        with self.conn:
+            self.conn.execute("""
+                CREATE TABLE IF NOT EXISTS listings (
+                    platform TEXT,
+                    title TEXT,
+                    price TEXT,
+                    size TEXT,
+                    link TEXT UNIQUE
+                )
+            """)
 
     def insert_listing(self, platform, title, price, size, link):
-        query = """
-        INSERT INTO listings (platform, title, price, size, link)
-        VALUES (?, ?, ?, ?, ?)
-        """
-        self.conn.execute(query, (platform, title, price, size, link))
-        self.conn.commit()
+        with self.conn:
+            self.conn.execute("""
+                INSERT OR IGNORE INTO listings (platform, title, price, size, link)
+                VALUES (?, ?, ?, ?, ?)
+            """, (platform, title, price, size, link))
+
+    def fetch_all_listings(self):
+        with self.conn:
+            cursor = self.conn.execute("SELECT * FROM listings")
+            return cursor.fetchall()
+
+    def listing_exists(self, link):
+        with self.conn:
+            cursor = self.conn.execute("SELECT 1 FROM listings WHERE link = ?", (link,))
+            return cursor.fetchone() is not None
 
     def close(self):
         self.conn.close()
+
+db_handler = DatabaseHandler('listing_db')
+
+existing_listings = db_handler.fetch_all_listings()
+existing_links = []
+[existing_links.append(listing[5]) for listing in existing_listings]
+print(existing_links)

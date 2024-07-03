@@ -16,8 +16,7 @@ class Ukio:
         self.rent_to = rent_to
     
     def build_city(self):
-        city = self.city
-        return city
+        return self.city
 
     def build_url(self):
         base_url = f'https://ukio.com/apartments/{self.build_city()}'
@@ -27,7 +26,7 @@ class Ukio:
             params['check_in'] = self.check_in
         if self.check_out:
             params['check_out'] = self.check_out
-        if self.bedrooms:
+        if self.bedrooms is not None:
             params['bedrooms'] = self.bedrooms
             if self.exact_bedrooms:
                 params['exact_bedrooms'] = 'true'
