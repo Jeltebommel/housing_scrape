@@ -5,14 +5,17 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
+
 class Spotahome:
-    def __init__(self, city, move_in, move_out, min_price, max_price, bedrooms):
+    def __init__(self, city, move_in, move_out, min_price, max_price, bedrooms, property_type):
         self.city = city
         self.move_in = move_in
         self.move_out = move_out
         self.min_price = min_price
         self.max_price = max_price
+        self.property_type = property_type
         self.bedrooms = bedrooms
+        
 
     def build_city(self):
         city = f"{self.city}--spain"
@@ -20,6 +23,14 @@ class Spotahome:
 
     def build_url(self):
         base_url = f'https://www.spotahome.com/s/{self.build_city()}'
+        
+        if self.property_type == 'studio':
+            base_url += '/for-rent:studios'
+        elif self.property_type == 'room':
+            base_url += '/for-rent:rooms'
+        elif self.property_type == 'apartment':
+            base_url += '/for-rent:apartments'
+
         params = {}
 
         if self.move_in and self.move_out:
@@ -39,9 +50,9 @@ class Spotahome:
                 base_url += '/bedrooms:2/bedrooms:3more'
             else:
                 base_url += f'/bedrooms:{self.bedrooms}'
-
+                
         query_string = '&'.join([f'{key}={value}' for key, value in params.items()])
-        full_url = f'{base_url}?{query_string}'
+        full_url = f'{base_url}?{query_string}' if query_string else base_url
         return full_url
 
     def scrape_listing_details(self, driver, url):
@@ -95,3 +106,4 @@ class Spotahome:
             return []
         finally:
             driver.quit()
+

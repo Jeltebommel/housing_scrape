@@ -6,17 +6,18 @@ from platforms.ukio import Ukio
 from platforms.real_estate import RealEstate
 
 class Search:
-    def __init__(self, city, move_in=None, move_out=None, min_price=None, max_price=None, bedrooms=None):
+    def __init__(self, city, move_in=None, move_out=None, min_price=None, max_price=None, property_type=None, bedrooms=None):
         self.city = city
         self.move_in = move_in
         self.move_out = move_out
         self.min_price = min_price
         self.max_price = max_price
+        self.property_type = property_type
         self.bedrooms = bedrooms
         self.platforms = [
-            HousingAnywhere(city, min_price, max_price, bedrooms),
-            Spotahome(city, move_in, move_out, min_price, max_price, bedrooms),
-            Properstar(city, min_price, max_price, bedrooms),
+            HousingAnywhere(city, min_price, max_price, property_type, bedrooms),
+            Spotahome(city, move_in, move_out, min_price, max_price, property_type, bedrooms),
+            Properstar(city, min_price, max_price, property_type, bedrooms),
             ThinkSpain(city, min_price, max_price, bedrooms),
             Ukio(city, check_in=move_in, check_out=move_out, bedrooms=bedrooms, rent_from=min_price, rent_to=max_price),
             RealEstate(city, min_price, max_price, bedrooms)
