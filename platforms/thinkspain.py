@@ -17,7 +17,7 @@ class ThinkSpain:
         return city
 
     def build_url(self):
-        base_url = f"https://www.thinkspain.com/property-to-rent-long-term/{self.build_city()}"
+        base_url = f"https://www.thinkspain.com/property-to-rent-long-term/{self.build_city()}&order=RecentFirst"
         params = []
 
         if self.min_price is not None:

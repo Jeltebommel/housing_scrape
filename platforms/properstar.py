@@ -19,7 +19,7 @@ class Properstar:
         return city
 
     def build_url(self):
-        base_url = f"https://www.properstar.nl/{self.build_city()}/huur"
+        base_url = f"https://www.properstar.nl/{self.build_city()}/huur/meest-recent"
 
         if self.property_type == 'apartment':
             base_url += "/appartement-huis"

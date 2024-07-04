@@ -37,9 +37,3 @@ class DatabaseHandler:
     def close(self):
         self.conn.close()
 
-db_handler = DatabaseHandler('listing_db')
-
-existing_listings = db_handler.fetch_all_listings()
-existing_links = []
-[existing_links.append(listing[5]) for listing in existing_listings]
-print(existing_links)

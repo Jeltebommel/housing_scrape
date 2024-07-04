@@ -18,7 +18,7 @@ class RealEstate:
         return city
 
     def build_url(self):
-        base_url = f"https://www.realestate.com.au/international/es/{self.build_city()}/rent"
+        base_url = f"https://www.realestate.com.au/international/es/{self.build_city()}/rent?sort=date+desc"
         params = {}
 
         if self.min_price:
@@ -29,7 +29,7 @@ class RealEstate:
             params['minbed'] = self.bedrooms
 
         query_string = urlencode(params)
-        full_url = base_url if not query_string else f"{base_url}?{query_string}"
+        full_url = base_url if not query_string else f"{base_url}&{query_string}"
         
         return full_url
 
