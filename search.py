@@ -4,6 +4,7 @@ from platforms.housing_anywhere import HousingAnywhere
 from platforms.thinkspain import ThinkSpain
 from platforms.ukio import Ukio
 from platforms.real_estate import RealEstate
+from platforms.casamona import Casamona
 
 class Search:
     def __init__(self, city, move_in=None, move_out=None, min_price=None, max_price=None, property_type=None, bedrooms=None):
@@ -29,7 +30,8 @@ class Search:
             Properstar(city, min_price, max_price, property_type, bedrooms),
             ThinkSpain(city, min_price, max_price, bedrooms),
             Ukio(city, check_in=move_in, check_out=move_out, bedrooms=bedrooms, rent_from=min_price, rent_to=max_price),
-            RealEstate(city, min_price, max_price, bedrooms)
+            RealEstate(city, min_price, max_price, bedrooms),
+            Casamona(city, min_price, max_price, bedrooms)
         ]
         self.results = []
 
